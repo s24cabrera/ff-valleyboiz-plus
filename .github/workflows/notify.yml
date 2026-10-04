@@ -1,0 +1,22 @@
+# GitHub doesn't notify you about pull requests you open yourself, and the
+# weekly update acts as you. This bot comment @mentions the repo owner so the
+# GitHub mobile app sends a push notification.
+name: Notify owner
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  ping:
+    if: github.head_ref == 'weekly-update'
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          OWNER: ${{ github.repository_owner }}
+        run: gh pr comment "$NUMBER" --repo "$GITHUB_REPOSITORY" --body "@$OWNER this week's update is ready for review. Merge to publish it."
