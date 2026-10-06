@@ -114,7 +114,8 @@
       });
       const copy = card.querySelector('[data-act="copy"]');
       copy.addEventListener("click", async () => {
-        const text = r.chat_text;
+        // End with this site's link so the text is ready to paste into the group chat
+        const text = `${r.chat_text}\n\n${new URL("season.html", location.href).href}`;
         let ok = false;
         try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {
           // Fallback for browsers that block the clipboard API on local files

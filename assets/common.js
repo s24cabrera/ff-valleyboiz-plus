@@ -349,6 +349,37 @@
     return `background:color-mix(in srgb, ${v > 0 ? "var(--accent)" : "var(--series-2)"} ${p}%, transparent)`;
   };
 
+  // ---------- staying current in home-screen apps ----------
+  // An app saved to the home screen (iPhone especially) resumes its saved page
+  // instead of reloading, and has no reload button. When the page comes back
+  // into view, ask the server (bypassing the cache) whether the league data has
+  // changed; if so, reload at a fresh address so the new pages and data load.
+  if (new URLSearchParams(location.search).has("fresh")) {
+    const u = new URL(location.href);
+    u.searchParams.delete("fresh");  // the reload marker isn't part of the view
+    history.replaceState(null, "", u.pathname + u.search + u.hash);
+  }
+  let lastCheck = Date.now();
+  const checkForUpdate = () => {
+    if (document.visibilityState !== "visible" || location.protocol === "file:" || Date.now() - lastCheck < 30000) return;
+    lastCheck = Date.now();
+    const id = leagueId();
+    const current = ((window.FFL_LEAGUES || {})[id] || {}).v;
+    fetch(`data/leagues.js?check=${Date.now()}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.text() : ""))
+      .then((text) => {
+        const m = text.match(/"v":\s*"([0-9a-f]+)"/);
+        if (m && current && m[1] !== current) {
+          const u = new URL(location.href);
+          u.searchParams.set("fresh", m[1]);
+          location.replace(u.href);
+        }
+      })
+      .catch(() => { /* offline: keep showing what we have */ });
+  };
+  document.addEventListener("visibilitychange", checkForUpdate);
+  window.addEventListener("pageshow", (e) => { if (e.persisted) { lastCheck = 0; checkForUpdate(); } });
+
   // ---------- filters (kept in the URL so a view can be shared) ----------
   const params = new URLSearchParams(location.search);
   FFL.filters = { week: params.get("week") || "all", season: params.get("season") || "all", mgr: params.get("mgr") || "" };
