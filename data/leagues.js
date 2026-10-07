@@ -1,1 +1,1 @@
-window.FFL_LEAGUES={"174818026": {"name": "Valleyboiz PLUS", "seasons": [2026, 2026], "v": "98bc0cc5f9"}};
+window.FFL_LEAGUES={"174818026": {"name": "Valleyboiz PLUS", "seasons": [2026, 2026], "v": "332937ac2c"}};
