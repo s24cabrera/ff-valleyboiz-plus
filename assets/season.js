@@ -693,17 +693,29 @@
       if (!isFinite(wk)) return;
       const lus = s.lineups.filter((l) => l.week === wk && FFL.mgrOK(mgrOf(l.team_id)));
       const live = !(s.weeks.find((x) => x.week === wk) || {}).final;
-      const body = section("rosters", "Rosters", `Week ${wk}${live ? " · in progress" : ""} · starters above bench`);
+      const body = section("rosters", "Rosters", `Week ${wk}${live ? " · in progress" : ""} · starters in lineup order, then bench`);
       const grid = document.createElement("div"); grid.className = "grid-3"; body.appendChild(grid);
       const order = s.standings.map((r) => r.team_id);
       lus.sort((a, b) => order.indexOf(a.team_id) - order.indexOf(b.team_id)).forEach((l) => {
         const row = (p) => `<tr><td style="width:36px;padding-right:0">${FFL.headshot(p, 30)}</td><td><b style="font-weight:500">${esc(p.n)}</b>${injTag(p.id)}<span class="sub2">${p.pos}${FFL.proAbbr(p.pro) ? " · " + FFL.proAbbr(p.pro) : ""}${p.st ? "" : " · " + p.slot}</span></td>` +
           `<td class="n">${fmt(p.pts, 1)}<span class="sub2">${p.proj != null ? "proj " + fmt(p.proj, 1) : ""}</span></td></tr>`;
-        const st = l.players.filter((p) => p.st), bn = l.players.filter((p) => !p.st);
+        // Starters in the league's lineup order (QB, RB, RB, WR, ...), one row per
+        // starting slot; a slot nobody filled shows as Empty, like on ESPN.
+        const slotCell = (label) => `<td class="slot-cell">${esc(label)}</td>`;
+        const left = l.players.filter((p) => p.st);
+        const st = [];
+        (s.lineup_slots || []).forEach((slot) => {
+          const i = left.findIndex((p) => p.slot === slot);
+          st.push(i >= 0 ? slotCell(slot) + row(left.splice(i, 1)[0]).slice(4) : `${slotCell(slot)}<td></td><td class="muted">Empty</td><td class="n muted">–</td></tr>`);
+        });
+        left.forEach((p) => st.push(slotCell(p.slot) + row(p).slice(4)));  // anything outside the usual slots
+        const POS = ["QB", "RB", "WR", "TE", "D/ST", "K"];
+        const bn = l.players.filter((p) => !p.st).sort((a, b) =>
+          (a.slot === "IR") - (b.slot === "IR") || (POS.indexOf(a.pos) + 1 || 9) - (POS.indexOf(b.pos) + 1 || 9) || (b.proj || 0) - (a.proj || 0));
         const c = FFL.card(grid, { flush: true });
         c.innerHTML = `<div style="padding:16px 16px 6px">${whoT(l.team_id, 36)}</div>` +
-          `<table><tbody>${st.map(row).join("")}</tbody></table>` +
-          `<details class="how" style="margin:0 16px 14px"><summary>Bench (${bn.length})</summary><table><tbody>${bn.map(row).join("")}</tbody></table></details>`;
+          `<table class="roster"><tbody>${st.map((r) => "<tr>" + r).join("")}</tbody></table>` +
+          `<details class="how" style="margin:0 16px 14px"><summary>Bench (${bn.length})</summary><table class="roster"><tbody>${bn.map((p) => "<tr>" + slotCell(p.slot) + row(p).slice(4)).join("")}</tbody></table></details>`;
       });
     }
 

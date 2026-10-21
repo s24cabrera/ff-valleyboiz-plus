@@ -508,3 +508,6 @@ body.nav-open { overflow: hidden; }
 /* Profile best/worst picks: top 5, expandable */
 .draft-list tr.extra { display: none; }
 .open-list .draft-list tr.extra { display: table-row; }
+
+/* Roster cards: lineup-slot label column (QB, RB, FLEX...) */
+table.roster td.slot-cell { width: 44px; padding-right: 0; font-size: 11px; font-weight: 600; letter-spacing: .04em; color: var(--text-2); white-space: nowrap; }
