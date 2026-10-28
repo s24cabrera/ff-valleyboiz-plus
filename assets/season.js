@@ -207,7 +207,7 @@
     const awardValue = (a) => ({
       mvp: `${fmt(a.value, 1)} pts`, high: `${fmt(a.value, 1)} pts`, low: `${fmt(a.value, 1)} pts`,
       beatdown: `by ${fmt(a.value, 1)}`, nailbiter: `by ${fmt(a.value, 2)}`, lucky: `${fmt(a.value, 1)} pts`, robbed: `${fmt(a.value, 1)} pts`,
-      overachiever: `+${fmt(a.value, 1)}`, bust: `−${fmt(a.value, 1)}`, bench_hero: `${fmt(a.value, 1)} pts`, facepalm: `${fmt(a.value, 1)} left`,
+      overachiever: `+${fmt(a.value, 1)}`, bust: `−${fmt(a.value, 1)}`, bench_hero: `${fmt(a.value, 1)} pts`, injury_bug: `${fmt(a.value, 1)} pts`, facepalm: `${fmt(a.value, 1)} left`,
     }[a.k]);
     function renderAwards() {
       const keys = Object.keys(s.awards).map(Number).sort((a, b) => a - b);
